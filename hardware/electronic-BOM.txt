@@ -1,0 +1,3 @@
+stepper driver - 2 - drv8825
+li-ion battery - 3 - 18650
+microcontroler - 1 - esp32
