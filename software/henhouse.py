@@ -64,7 +64,7 @@
 ##set dir
 #p_dir.value(state) #state=1 : ouvert
 #pwm2 = PWM(Pin(2), freq=1000, duty=512)
-#stopTim.init(mode=Timer.ONE_SHOT,period=stroke,move())
+#stopTim.init(mode=Timer.ONE_SHOT,period=stroke,move()) # stroke 45000_ms / 300_mm => 150_ms/mm@1200_Hz
 
 #stop door() "callback"
 #pwm2.deinit()
