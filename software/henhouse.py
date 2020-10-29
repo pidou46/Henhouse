@@ -1,9 +1,8 @@
 import network, ntptime
 from time import localtime
 from sun import Sun
-from machine import Timer, RTC
-
-
+from machine import Timer, RTC, Pin, PWM
+import machine
 
 #device is waking up by an alarm scheduled by itself earlier or by first start
 #Connect to network
@@ -13,18 +12,22 @@ from machine import Timer, RTC
 
 
 #Check if device woke from deep sleep
-#if machine.reset_cause() == machine.DEEPSLEEP_RESET:
-#   print('woke from a deep sleep')
-#p1=Pin(4, Pin.OUT, None) # un-hold internal pullup
+if machine.reset_cause() == machine.DEEPSLEEP_RESET:
+    print('woke from a deep sleep')
+    p1=Pin(4, Pin.OUT, None) # un-hold internal pullup
 
 #connect to network
 SSID='TNCAP31A0C1'
 wlan = network.WLAN(network.STA_IF) # create station interface
 wlan.active(True)       # activate the interface
-wlan.connect('TNCAP31A0C1', '16EC3AD4F1') # connect to an AP
-print("device connected to SSID {} with IP adress {}".format(SSID,wlan.ifconfig()[0]))         # get the interface's IP/netmask/gw/DNS addresses
-print("RSSI {}".format(wlan.status('rssi')))
-
+try:
+    wlan.connect('TNCAP31A0C1', '16EC3AD4F1') # connect to an AP
+    print("device connected to SSID {}: {}".format(SSID,wlan.isconnected()))
+    print("IP adress {}".format(wlan.ifconfig()[0]))         # get the interface's IP/netmask/gw/DNS addresses
+    print("RSSI {}".format(wlan.status('rssi')))
+except:
+    pass
+    
 #update RCT time form network
 ntptime.host = 'pool.ntp.org'
 #ntptime.settime()
@@ -42,45 +45,62 @@ sunset=sun.getSunsetTime( coords )['decimal']
 print("Sunset (UTC decimal): {}".format(sunset))
 
 #scheduling
-#
+
+H_TO_MS=3600000 # decimal hour to ms : 60*60*1000=3600000_ms=1_h
+
+driverDoor = PWM(Pin(2), freq=0, duty=512)
+stopTim=Timer(1)
+dirPin=Pin(4, Pin.OUT)
+
+#override now variable for testing
+now=7.45
+
+#callback
+def closeDoor(_):
+    dirPin.value(0)
+    print("Close the door")
+    driverDoor.freq(1200) # start movement
+    stopTim.init(mode=Timer.ONE_SHOT,period=45000,callback=stopDoor) # stroke 45000_ms / 300_mm => 150_ms/mm@1200_Hz
+    return
+
+#callback
+def openDoor(_):
+    dirPin.value(1)
+    print("Open the door")
+    driverDoor.freq(1200) #start movement
+    stopTim.init(mode=Timer.ONE_SHOT,period=45000,callback=stopDoor) # stroke 45000_ms / 300_mm => 150_ms/mm@1200_Hz
+    return
+
+#callback
+def stopDoor(_):
+    print("Stop mouvement")
+    driverDoor.deinit() #stop movement
+    #disable drv8825 to save energy
+    return
+
 tim=Timer(0)
 rtc=RTC()
 if sunrise < now < sunset :
-    print("wake in the morning")
-    #tim.init(mode=Timer.ONE_SHOT,period=(sunset-now)*1000,callback=closeDoor) # door action
-#    # schedule next wakeup alarm 1min too early to accommodate RCT drift
-#    rtc.alarm(rtc.ALARM0, sunrise-nowDecimal-60000) # alarm (ms)
+    print("Woken during dailight, scheduling evening actions.")
+    period=int(round((sunset-now)*H_TO_MS))
+    print("snooze period: {}_h - {}_ms".format(period/H_TO_MS, period))
+    tim.init(mode=Timer.ONE_SHOT,period=period,callback=closeDoor) # door action
+    # compute duration to next wakeup 
+    period=((24-now+sunrise)*H_TO_MS)
 else:
-    print("wake in the evening")
-    #tim.init(mode=Timer.ONE_SHOT,period=(sunrise-now)*1000,callback=openDoor)
-#    # schedule next wakeup alarm 1min too early to accommodate RCT drift
-#    rtc.alarm(rtc.ALARM0, sunset-nowDecimal-60000) # alarm (ms)
+    print("Woken at night, scheduling morning actions.")
+    period=int(round((sunrise-now)*H_TO_MS))
+    print("snooze period: {}_h - {}_ms".format(period/H_TO_MS, period))
+    tim.init(mode=Timer.ONE_SHOT,period=period,callback=openDoor)
+    # compute duration to next wakeup 
+    period=((sunset-now)*H_TO_MS)
 
+#alarm 1min too early to accommodate RCT drift
+period=period-60000 # 60000=1_min
+print("next wakeup: {}_h - {}_ms".format(period/H_TO_MS, period))
 
-#wait for door action to be done
-#sensor or timer ?
-#disable drv8825 to save energy
 
 #put device in deepsleep
 #p1=Pin(4, Pin.IN, Pin.PULL_HOLD) # save power
-#machine.deepsleep()
+#machine.deepsleep(period) # (ms)
 
-#move door(state) "callback"
-#from machine import PWM
-#p_en=Pin(5, Pin.OUT)
-#p_dir=Pin(4, Pin.OUT)
-##enable drv8825
-#p_en.on()
-##set dir
-#p_dir.value(state) #state=1 : ouvert
-#pwm2 = PWM(Pin(2), freq=1000, duty=512)
-#stopTim.init(mode=Timer.ONE_SHOT,period=stroke,move()) # stroke 45000_ms / 300_mm => 150_ms/mm@1200_Hz
-
-#stop door() "callback"
-#pwm2.deinit()
-
-def closeDoor():
-    return
-
-def openDoor():
-    return
