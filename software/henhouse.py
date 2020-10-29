@@ -1,3 +1,9 @@
+import network, ntptime
+from time import localtime
+from sun import Sun
+from machine import Timer, RTC
+
+
 
 #device is waking up by an alarm scheduled by itself earlier or by first start
 #Connect to network
@@ -12,37 +18,41 @@
 #p1=Pin(4, Pin.OUT, None) # un-hold internal pullup
 
 #connect to network
-#import network
-# wlan = network.WLAN(network.STA_IF) # create station interface
-# wlan.active(True)       # activate the interface
-# wlan.connect('essid', 'password') # connect to an AP
-# wlan.ifconfig()         # get the interface's IP/netmask/gw/DNS addresses
-
+SSID='TNCAP31A0C1'
+wlan = network.WLAN(network.STA_IF) # create station interface
+wlan.active(True)       # activate the interface
+wlan.connect('TNCAP31A0C1', '16EC3AD4F1') # connect to an AP
+print("device connected to SSID {} with IP adress {}".format(SSID,wlan.ifconfig()[0]))         # get the interface's IP/netmask/gw/DNS addresses
+print("RSSI {}".format(wlan.status('rssi')))
 
 #update RCT time form network
-#import ntptime
+ntptime.host = 'pool.ntp.org'
 #ntptime.settime()
+now=float("{}.{}".format(localtime()[3],localtime()[4]))
+print("time: {}".format(localtime()))
 
 #calculate sunrise/sunset time
-#import sun
-#coords = {'longitude' : 2.107, 'latitude' : 44.584 }
-#sun = Sun()
+coords = {'longitude' : 2.107, 'latitude' : 44.584 }
+sun = Sun()
 # Sunrise time UTC (decimal, 24 hour format)
-#print(sun.getSunriseTime( coords )['decimal'])
+sunrise=sun.getSunriseTime( coords )['decimal']
+print("Sunrise (UTC decimal) : {}".format(sunrise))
 # Sunset time UTC (decimal, 24 hour format)
-#print(sun.getSunsetTime( coords )['decimal'])
+sunset=sun.getSunsetTime( coords )['decimal']
+print("Sunset (UTC decimal): {}".format(sunset))
 
 #scheduling
 #
-#from machine import Timer, RTC
-#tim=Timer()
-#rtc=machine.RTC()
-#if sunrise<nowDecimal()<sunset :
-#    tim.init(mode=Timer.ONE_SHOT,period=(sunset-nowDecimal)*1000,closeDoor()) # door action
+tim=Timer(0)
+rtc=RTC()
+if sunrise < now < sunset :
+    print("wake in the morning")
+    #tim.init(mode=Timer.ONE_SHOT,period=(sunset-now)*1000,callback=closeDoor) # door action
 #    # schedule next wakeup alarm 1min too early to accommodate RCT drift
 #    rtc.alarm(rtc.ALARM0, sunrise-nowDecimal-60000) # alarm (ms)
-#else
-#    tim.init(mode=Timer.ONE_SHOT,period=(sunrise-nowDecimal)*1000,openDoor())
+else:
+    print("wake in the evening")
+    #tim.init(mode=Timer.ONE_SHOT,period=(sunrise-now)*1000,callback=openDoor)
 #    # schedule next wakeup alarm 1min too early to accommodate RCT drift
 #    rtc.alarm(rtc.ALARM0, sunset-nowDecimal-60000) # alarm (ms)
 
@@ -69,4 +79,8 @@
 #stop door() "callback"
 #pwm2.deinit()
 
+def closeDoor():
+    return
 
+def openDoor():
+    return
