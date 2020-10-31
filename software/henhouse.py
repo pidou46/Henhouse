@@ -1,7 +1,7 @@
 import network, ntptime
 from time import localtime
 from sun import Sun
-from machine import Timer, RTC
+from machine import Timer, RTC, PWM
 
 
 
