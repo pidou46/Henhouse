@@ -1,0 +1,10 @@
+Stepper motor                     - 1 - 17HS4401
+M5 Stainless Steel Threaded Rod   - 1 -
+M5 bronze nut                     - 1 -
+drawer slide                      - 2 -
+rod coupling                      - 1 -
+push pull bracket                 - 1 - 3D print
+stepper motor bracket             - 1 - 3D print
+wood door                         - 1 -
+wood frame                        - 1 -
+protection cap                    - 1 -
