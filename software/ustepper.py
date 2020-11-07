@@ -2,6 +2,8 @@
 from machine import Pin, PWM, Timer
 import time
 
+STROKE=450
+
 class Stepper:
     def __init__(self, dirPin, stepPin, m0, m1):
         self.dirPin=dirPin
@@ -9,9 +11,9 @@ class Stepper:
         self.m0=m0 #microstep pin M0
         self.m1=m1
         #M0,M1,M2,ms
-        self.timeTable=[(1,1,0,512),(0,1,0,512),(1,0,0,512),(0,0,0,45000),(1,0,0,512),(0,1,0,512),(1,1,0,512)]
+        self.timeTable=[(1,1,0,512),(0,1,0,512),(1,0,0,512),(0,0,0,STROKE),(1,0,0,512),(0,1,0,512),(1,1,0,512)]
         self.tim=Timer(-1)
-        self.stepPin.freq(1200)
+        self.stepPin.freq(1000)
         self.index=0
 
     #travel (in steps), speed (in steps / seconds)

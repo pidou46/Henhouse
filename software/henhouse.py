@@ -10,6 +10,13 @@ import machine
 #calculate sunrise / sunset at location and actual date
 #scheduling the next door movement deide if it shoud open or close depending on now and sunrise /sunset values
 
+H_TO_MS=3600000 # decimal hour to ms : 60*60*1000=3600000_ms=1_h
+
+STROKE=4500 # stroke 45000_ms / 300_mm => 150_ms/mm@1200_Hz
+DIR_PIN=22
+STEP_PIN=21
+
+
 
 #Check if device woke from deep sleep
 if machine.reset_cause() == machine.DEEPSLEEP_RESET:
@@ -46,11 +53,10 @@ print("Sunset (UTC decimal): {}".format(sunset))
 
 #scheduling
 
-H_TO_MS=3600000 # decimal hour to ms : 60*60*1000=3600000_ms=1_h
 
-driverDoor = PWM(Pin(2), freq=0, duty=512)
+stepPin = PWM(Pin(STEP_PIN), freq=0, duty=32)
 stopTim=Timer(1)
-dirPin=Pin(4, Pin.OUT)
+dirPin=Pin(DIR_PIN, Pin.OUT)
 
 #override now variable for testing
 now=7.45
@@ -59,22 +65,22 @@ now=7.45
 def closeDoor(_):
     dirPin.value(0)
     print("Close the door")
-    driverDoor.freq(1200) # start movement
-    stopTim.init(mode=Timer.ONE_SHOT,period=45000,callback=stopDoor) # stroke 45000_ms / 300_mm => 150_ms/mm@1200_Hz
+    stepPin.freq(1000) # start movement
+    stopTim.init(mode=Timer.ONE_SHOT,period=STROKE,callback=stopDoor)
     return
 
 #callback
 def openDoor(_):
     dirPin.value(1)
     print("Open the door")
-    driverDoor.freq(1200) #start movement
-    stopTim.init(mode=Timer.ONE_SHOT,period=45000,callback=stopDoor) # stroke 45000_ms / 300_mm => 150_ms/mm@1200_Hz
+    stepPin.freq(1000) #start movement
+    stopTim.init(mode=Timer.ONE_SHOT,period=STROKE,callback=stopDoor)
     return
 
 #callback
 def stopDoor(_):
     print("Stop mouvement")
-    driverDoor.deinit() #stop movement
+    stepPin.deinit() #stop movement
     #disable drv8825 to save energy
     return
 
@@ -104,3 +110,5 @@ print("next wakeup: {}_h - {}_ms".format(period/H_TO_MS, period))
 #p1=Pin(4, Pin.IN, Pin.PULL_HOLD) # save power
 #machine.deepsleep(period) # (ms)
 
+#if __name__=="__main__":
+    
