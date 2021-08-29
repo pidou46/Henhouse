@@ -8,9 +8,15 @@ Avantges:
 Test RSSI:
 position : a l'angle du toit de la cabane
 activation de l'antenne extérieure:
-par défaut c'est l'antenne intégrée qui est selectionnée via la résistance SMD. Pour selectionner l'antenne extérieure il faut déplacer la résistance, mais elle est tellement petite que c'est quasiment impossible. Mais il est possible de remplacer la résistance par une simple petit bout de fil multibrain tres fin qui permet de realiser le pont.
-
-
+par défaut c'est l'antenne intégrée qui est selectionnée via la résistance SMD. Pour selectionner l'antenne extérieure il faut déplacer la résistance, cependant elle est tellement petite que c'est quasiment impossible. Mais il est possible de remplacer la résistance par une simple petit bout de fil multibrain tres fin qui permet de realiser le pont.
 
 Antenne intégrée: -81_db
-Antenne exterieure: -79_db
+Antenne exterieure: -69_db
+
+L'antenne permet donc de gagner 12_db (4X), ce qui est pas si mal, il est conseillé de rester au dessus de -70_db pour une liaison fiable, c'est donc un peu limite.
+
+L'alternative est de descendre un cable RJ45, jusqu'a la cabane.
+
+
+
+
