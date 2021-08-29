@@ -1,0 +1,16 @@
+choix MCU:
+module ESP32-S
+Avantges:
+- Ce n'est pas un kit de developpement, il n'y a pas de convertisseur USB->TTL intégré ni de led, ce qui permet d'abaisser la consomation au repos et donc la durée de vie de la batterie
+- le module à une prise d'antenne, ce qui permet d'augmenter la portée de la conexion wifi.
+- pas cher 2euro
+
+Test RSSI:
+position : a l'angle du toit de la cabane
+activation de l'antenne extérieure:
+par défaut c'est l'antenne intégrée qui est selectionnée via la résistance SMD. Pour selectionner l'antenne extérieure il faut déplacer la résistance, mais elle est tellement petite que c'est quasiment impossible. Mais il est possible de remplacer la résistance par une simple petit bout de fil multibrain tres fin qui permet de realiser le pont.
+
+
+
+Antenne intégrée: -81_db
+Antenne exterieure: -79_db
